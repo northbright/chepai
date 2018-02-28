@@ -10,6 +10,8 @@ import (
 
 func ExampleGetTimeInfo() {
 	pool := redishelper.NewRedisPool(":6379", "", 1000, 100, 60, true)
+	defer pool.Close()
+
 	cp := chepai.New(pool, 10, 30, 30, 83000, 10000)
 
 	timeInfo := cp.GetTimeInfo()
@@ -22,6 +24,8 @@ func ExampleGetTimeInfo() {
 
 func ExampleGetPhase() {
 	pool := redishelper.NewRedisPool(":6379", "", 1000, 100, 60, true)
+	defer pool.Close()
+
 	cp := chepai.New(pool, 10, 30, 30, 83000, 10000)
 
 	t := time.Now()
@@ -39,5 +43,18 @@ func ExampleGetPhase() {
 		phase := cp.GetPhase(t)
 		log.Printf("Phase: %v\n", phase)
 	}
+	// Output:
+}
+
+func ExampleComputePhaseTwoLowestPrice() {
+	pool := redishelper.NewRedisPool(":6379", "", 1000, 100, 60, true)
+	defer pool.Close()
+
+	cp := chepai.New(pool, 10, 30, 30, 83000, 10000)
+	price, err := cp.ComputePhaseTwoLowestPrice()
+	if err != nil {
+		log.Printf("ComputePhaseTwoLowestPrice() error: %v", err)
+	}
+	log.Printf("Phase Two Lowest Price: %v", price)
 	// Output:
 }
