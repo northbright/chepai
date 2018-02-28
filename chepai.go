@@ -41,7 +41,16 @@ func (cp *Chepai) GetTimeInfo() *TimeInfo {
 }
 
 func (cp *Chepai) GetPhase(t time.Time) int {
-	return 0
+	switch {
+	case t.Before(cp.timeInfo.BeginTime):
+		return 0
+	case t.Equal(cp.timeInfo.BeginTime) || (t.After(cp.timeInfo.BeginTime) && t.Before(cp.timeInfo.PhaseOneEndTime)):
+		return 1
+	case t.Equal(cp.timeInfo.PhaseOneEndTime) || (t.After(cp.timeInfo.PhaseOneEndTime) && t.Before(cp.timeInfo.PhaseTwoEndTime)):
+		return 2
+	default:
+		return 3
+	}
 }
 
 func (cp *Chepai) Bid(ID string, price int64) error {
