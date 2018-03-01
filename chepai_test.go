@@ -14,6 +14,7 @@ func ExampleChepai_GetTimeInfo() {
 	defer pool.Close()
 
 	cp := chepai.New(pool, 10, 30, 30, 83000, 10)
+	cp.FlushDB()
 
 	timeInfo := cp.GetTimeInfo()
 	log.Printf("Time Info:\nBegin Time: %v\nPhase One End Time: %v\nPhase Two End Time: %v",
@@ -28,6 +29,7 @@ func ExampleChepai_GetPhase() {
 	defer pool.Close()
 
 	cp := chepai.New(pool, 10, 30, 30, 83000, 10)
+	cp.FlushDB()
 
 	t := time.Now()
 	times := []time.Time{
@@ -52,6 +54,15 @@ func ExampleChepai_ComputePhaseTwoLowestPrice() {
 	defer pool.Close()
 
 	cp := chepai.New(pool, 0, 2, 5, 83000, 10)
+	cp.FlushDB()
+
+	bidderNum, err := cp.GetBidderNum()
+	if err != nil {
+		log.Printf("GetBidderNum() error: %v", err)
+		return
+	}
+
+	log.Printf("before phase 1: bidder num: %v", bidderNum)
 
 	// Phase 1
 	for i := 0; i < 10; i++ {
@@ -71,8 +82,17 @@ func ExampleChepai_ComputePhaseTwoLowestPrice() {
 	price, err := cp.ComputePhaseTwoLowestPrice()
 	if err != nil {
 		log.Printf("ComputePhaseTwoLowestPrice() error: %v", err)
+		return
 	}
 	log.Printf("Phase Two Lowest Price: %v", price)
+
+	bidderNum, err = cp.GetBidderNum()
+	if err != nil {
+		log.Printf("GetBidderNum() error: %v", err)
+		return
+	}
+
+	log.Printf("phase 2: bidder num: %v", bidderNum)
 	// Output:
 }
 
@@ -81,18 +101,21 @@ func ExampleChepai_ValidPhaseTwoPrice() {
 	defer pool.Close()
 
 	cp := chepai.New(pool, 0, 30, 30, 83000, 10)
+	cp.FlushDB()
+
 	prices := []int64{82700, 82800, 82900, 83000, 83100, 83200, 83300, 83301, 82699, 84400}
 
 	lowestPrice, err := cp.ComputePhaseTwoLowestPrice()
 	if err != nil {
 		log.Printf("ComputePhaseTwoLowestPrice() error: %v", err)
+		return
 	}
 
 	for _, price := range prices {
 		valid := cp.ValidPhaseTwoPrice(lowestPrice, price)
 		log.Printf("%v: %v", price, valid)
 	}
-	log.Printf("xx: Phase Two Lowest Price: %v", lowestPrice)
+	log.Printf("Phase Two Lowest Price: %v", lowestPrice)
 	// Output:
 }
 
@@ -103,6 +126,7 @@ func ExampleChepai_Bid() {
 	defer pool.Close()
 
 	cp := chepai.New(pool, 1, 5, 5, 83000, 10)
+	cp.FlushDB()
 
 	price = 83000
 	log.Printf("1st bid: price: %v, %v", price, cp.Bid("1", price))

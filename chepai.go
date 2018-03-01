@@ -210,6 +210,24 @@ func (cp *Chepai) Bid(ID string, price int64) error {
 	return nil
 }
 
-func (cp *Chepai) GetParticipantNum() (int64, error) {
-	return 0, nil
+func (cp *Chepai) GetBidderNum() (int64, error) {
+	conn := cp.pool.Get()
+	defer conn.Close()
+
+	num, err := redis.Int64(conn.Do("GET", "bidder_num"))
+	if err != nil && err != redis.ErrNil {
+		return 0, err
+	}
+	return num, nil
+}
+
+func (cp *Chepai) FlushDB() error {
+	conn := cp.pool.Get()
+	defer conn.Close()
+
+	_, err := conn.Do("FLUSHDB")
+	if err != nil {
+		return err
+	}
+	return nil
 }
