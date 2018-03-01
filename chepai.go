@@ -20,6 +20,11 @@ type Chepai struct {
 	LicensePlateNum int64
 }
 
+type BidRecord struct {
+	Price int64 `redis:"price"`
+	Time  int64 `redis:"time"`
+}
+
 func New(pool *redis.Pool, startAfter, phaseOneDuration, phaseTwoDuration int, startPrice, licensePlateNum int64) *Chepai {
 	beginTime := time.Now().Add(time.Duration(startAfter) * time.Second)
 	phaseOneEndTime := beginTime.Add(time.Duration(phaseOneDuration) * time.Second)
@@ -230,4 +235,25 @@ func (cp *Chepai) FlushDB() error {
 		return err
 	}
 	return nil
+}
+
+func (cp *Chepai) GetBidRecordByID(phase int, ID string) (BidRecord, error) {
+	if phase != 1 && phase != 2 {
+		return BidRecord{}, fmt.Errorf("incorrect phase: %v", phase)
+	}
+
+	conn := cp.pool.Get()
+	defer conn.Close()
+
+	k := fmt.Sprintf("record:%v:phase:%v", ID, phase)
+	values, err := redis.Values(conn.Do("HGETALL", k))
+	if err != nil {
+		return BidRecord{}, err
+	}
+
+	var record BidRecord
+	if err = redis.ScanStruct(values, &record); err != nil {
+		return BidRecord{}, err
+	}
+	return record, nil
 }

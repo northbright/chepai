@@ -70,6 +70,10 @@ func ExampleChepai_ComputePhaseTwoLowestPrice() {
 		cp.Bid(ID, 83000)
 	}
 
+	phase := cp.GetPhase(time.Now())
+	record, _ := cp.GetBidRecordByID(phase, "2")
+	log.Printf("ID 2(phase %v) bid record: %v", phase, record)
+
 	// Phase 2
 	time.Sleep(time.Second * 2)
 	for i := 0; i < 8; i++ {
@@ -93,6 +97,11 @@ func ExampleChepai_ComputePhaseTwoLowestPrice() {
 	}
 
 	log.Printf("phase 2: bidder num: %v", bidderNum)
+
+	phase = cp.GetPhase(time.Now())
+	record, _ = cp.GetBidRecordByID(phase, "2")
+	log.Printf("ID 2(phase %v) bid record: %v", phase, record)
+
 	// Output:
 }
 
