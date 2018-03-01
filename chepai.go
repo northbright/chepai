@@ -66,7 +66,7 @@ func (cp *Chepai) ComputePhaseTwoLowestPrice() (int64, error) {
 
 	sum := int64(0)
 	for _, price := range prices {
-		k := fmt.Sprintf("%v:count", price)
+		k := fmt.Sprintf("%v:num", price)
 		num, err := redis.Int64(conn.Do("GET", k))
 		if err != nil && err != redis.ErrNil {
 			return 0, err
@@ -86,18 +86,16 @@ func (cp *Chepai) ComputePhaseTwoLowestPrice() (int64, error) {
 	if l > 0 {
 		if prices[l-1] > cp.StartPrice {
 			return cp.StartPrice, nil
-		} else {
-			return prices[l-1], nil
 		}
+		return prices[l-1], nil
 	}
 	return cp.StartPrice, nil
 }
 
-func (cp *Chepai) ComupteLowestPrice() (int64, error) {
+func (cp *Chepai) ComupteLowestPrice(phase int) (int64, error) {
 	conn := cp.pool.Get()
 	defer conn.Close()
 
-	phase := cp.GetPhase(time.Now())
 	switch phase {
 	case 0, 1:
 		return cp.StartPrice, nil
@@ -108,10 +106,105 @@ func (cp *Chepai) ComupteLowestPrice() (int64, error) {
 	}
 }
 
+func (cp *Chepai) ValidPhaseOnePrice(price int64) bool {
+	if price != cp.StartPrice {
+		return false
+	}
+	return true
+}
+
+func (cp *Chepai) ValidPhaseTwoPrice(lowestPrice, price int64) bool {
+	diffArr := []int64{-300, -200, -100, 0, 100, 200, 300}
+
+	diff := price - lowestPrice
+	for _, v := range diffArr {
+		if diff == v {
+			return true
+		}
+	}
+	return false
+}
+
 func (cp *Chepai) Bid(ID string, price int64) error {
-	phase := cp.GetPhase(time.Now())
-	if phase != 1 && phase != 2 {
-		return fmt.Errorf("incorrect phase: %v, should be 1,2", phase)
+	t := time.Now()
+	phase := cp.GetPhase(t)
+
+	switch phase {
+	case 1:
+		if !cp.ValidPhaseOnePrice(price) {
+			return fmt.Errorf("invalid phase one price: %v", price)
+		}
+
+		conn := cp.pool.Get()
+		defer conn.Close()
+
+		k := fmt.Sprintf("record:%v:phase:1", ID)
+		exists, err := redis.Bool(conn.Do("EXISTS", k))
+		if err != nil {
+			return err
+		}
+
+		if exists {
+			return fmt.Errorf("already bid on phase one")
+		}
+
+		conn.Do("MULTI")
+		conn.Send("HMSET", k, "time", t.UnixNano(), "price", price)
+		conn.Send("INCR", "bidder_num")
+		if _, err = conn.Do("EXEC"); err != nil {
+			return err
+		}
+		return nil
+	case 2:
+		lowestPrice, err := cp.ComputePhaseTwoLowestPrice()
+		if err != nil {
+			return err
+		}
+
+		if !cp.ValidPhaseTwoPrice(lowestPrice, price) {
+			return fmt.Errorf("invalid phase 2 price:%v", price)
+		}
+
+		conn := cp.pool.Get()
+		defer conn.Close()
+
+		k := fmt.Sprintf("record:%v:phase:1", ID)
+		exists, err := redis.Bool(conn.Do("EXISTS", k))
+		if err != nil {
+			return err
+		}
+
+		if !exists {
+			return fmt.Errorf("no bid record on phase one")
+		}
+
+		k = fmt.Sprintf("record:%v:phase:2", ID)
+		exists, err = redis.Bool(conn.Do("EXISTS", k))
+		if err != nil {
+			return err
+		}
+
+		if exists {
+			return fmt.Errorf("already bid on phase two")
+		}
+
+		conn.Do("MULTI")
+		conn.Send("HMSET", k, "time", t.UnixNano(), "price", price)
+		conn.Send("ZADD", "prices", price, price)
+
+		k = fmt.Sprintf("%v:num", price)
+		conn.Send("INCR", k)
+
+		k = fmt.Sprintf("%v:ids", price)
+		conn.Send("ZADD", k, t.UnixNano(), ID)
+
+		if _, err = conn.Do("EXEC"); err != nil {
+			return err
+		}
+		return nil
+
+	default:
+		return fmt.Errorf("incorrect phase: %v", phase)
 	}
 
 	return nil
