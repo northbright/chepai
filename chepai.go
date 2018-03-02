@@ -2,6 +2,7 @@ package chepai
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/garyburd/redigo/redis"
@@ -18,6 +19,7 @@ type Chepai struct {
 	timeInfo        TimeInfo
 	StartPrice      int64
 	LicensePlateNum int64
+	mux             sync.Mutex
 }
 
 type BidRecord struct {
@@ -39,6 +41,7 @@ func New(pool *redis.Pool, startAfter, phaseOneDuration, phaseTwoDuration int, s
 		},
 		StartPrice:      startPrice,
 		LicensePlateNum: licensePlateNum,
+		mux:             sync.Mutex{},
 	}
 }
 
@@ -131,6 +134,9 @@ func (cp *Chepai) ValidPhaseTwoPrice(lowestPrice, price int64) bool {
 }
 
 func (cp *Chepai) Bid(ID string, price int64) error {
+	cp.mux.Lock()
+	defer cp.mux.Unlock()
+
 	t := time.Now()
 	phase := cp.GetPhase(t)
 
