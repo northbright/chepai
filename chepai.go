@@ -246,6 +246,15 @@ func (cp *Chepai) GetBidRecordByID(phase int, ID string) (BidRecord, error) {
 	defer conn.Close()
 
 	k := fmt.Sprintf("record:%v:phase:%v", ID, phase)
+	exists, err := redis.Bool(conn.Do("EXISTS", k))
+	if err != nil {
+		return BidRecord{}, err
+	}
+
+	if !exists {
+		return BidRecord{}, nil
+	}
+
 	values, err := redis.Values(conn.Do("HGETALL", k))
 	if err != nil {
 		return BidRecord{}, err
