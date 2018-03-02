@@ -45,8 +45,8 @@ func New(pool *redis.Pool, startAfter, phaseOneDuration, phaseTwoDuration int, s
 	}
 }
 
-func (cp *Chepai) GetTimeInfo() *TimeInfo {
-	return &(cp.timeInfo)
+func (cp *Chepai) GetTimeInfo() TimeInfo {
+	return cp.timeInfo
 }
 
 func (cp *Chepai) GetPhase(t time.Time) int {
