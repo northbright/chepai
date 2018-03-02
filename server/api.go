@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	//"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -23,8 +24,6 @@ func getLoginID(c *gin.Context) (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("parser.Parse() error: %v", err)
 		}
-
-		log.Printf("m: %v", m)
 
 		// Convert interface{} to string
 		ID, ok := m["ID"].(string)
@@ -191,4 +190,50 @@ func getLicensePlateNum(c *gin.Context) {
 	licensePlateNum = cp.LicensePlateNum
 	success = true
 	log.Printf("getLicensePlateNum() OK, ID: %v, license plate num: %v", ID, licensePlateNum)
+}
+
+func bid(c *gin.Context) {
+	type Req struct {
+		Price int64 `json:"price"`
+	}
+
+	var (
+		err     error
+		errMsg  string
+		success = false
+		r       Req
+		ID      string
+		phase   int
+		price   int64
+	)
+
+	defer func() {
+		if err != nil {
+			errMsg = err.Error()
+			log.Printf("bid() error: %v", err)
+		}
+
+		c.JSON(200, gin.H{"success": success, "err": errMsg, "ID": ID, "phase": phase, "price": price})
+	}()
+
+	if err = c.BindJSON(&r); err != nil {
+		err = fmt.Errorf("invalid request")
+		return
+	}
+
+	price = r.Price
+
+	if ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error: %v", ID)
+		return
+	}
+
+	phase = cp.GetPhase(time.Now())
+
+	if err = cp.Bid(ID, price); err != nil {
+		return
+	}
+
+	success = true
+	log.Printf("bid() OK: ID: %v, phase: %v, price: %v", ID, phase, r.Price)
 }
