@@ -136,3 +136,59 @@ func loginPOST(c *gin.Context) {
 	success = true
 	log.Printf("LoginPOST() OK: ID: %v", r.ID)
 }
+
+func getStartPrice(c *gin.Context) {
+	var (
+		err        error
+		errMsg     string
+		success    = false
+		ID         string
+		startPrice int64
+	)
+
+	defer func() {
+		if err != nil {
+			errMsg = err.Error()
+			log.Printf("getStartPrice() error: %v", err)
+		}
+
+		c.JSON(200, gin.H{"success": success, "err": errMsg, "ID": ID, "start_price": startPrice})
+	}()
+
+	if ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error: %v", ID)
+		return
+	}
+
+	startPrice = cp.StartPrice
+	success = true
+	log.Printf("getStartPrice() OK, ID: %v, start price: %v", ID, startPrice)
+}
+
+func getLicensePlateNum(c *gin.Context) {
+	var (
+		err             error
+		errMsg          string
+		success         = false
+		ID              string
+		licensePlateNum int64
+	)
+
+	defer func() {
+		if err != nil {
+			errMsg = err.Error()
+			log.Printf("getLicensePlateNum() error: %v", err)
+		}
+
+		c.JSON(200, gin.H{"success": success, "err": errMsg, "ID": ID, "license_plate_num": licensePlateNum})
+	}()
+
+	if ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error: %v", ID)
+		return
+	}
+
+	licensePlateNum = cp.LicensePlateNum
+	success = true
+	log.Printf("getLicensePlateNum() OK, ID: %v, license plate num: %v", ID, licensePlateNum)
+}
