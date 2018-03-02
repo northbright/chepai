@@ -334,3 +334,44 @@ func (cp *Chepai) GenerateResults() error {
 	}
 	return nil
 }
+
+func (cp *Chepai) GetResults() (map[string]string, error) {
+	phase := cp.GetPhase(time.Now())
+	if phase != 3 {
+		return map[string]string{}, fmt.Errorf("only phase 3 can get results, current phase: %v", phase)
+	}
+
+	conn := cp.pool.Get()
+	defer conn.Close()
+
+	items := []string{}
+	results := map[string]string{}
+	cursor := 0
+	k := "results"
+	for {
+		v, err := redis.Values(conn.Do("HSCAN", k, cursor, "COUNT", 1024))
+		if err != nil {
+			return map[string]string{}, err
+		}
+
+		if v, err = redis.Scan(v, &cursor, &items); err != nil {
+			return map[string]string{}, err
+		}
+
+		l := len(items)
+		if l > 0 {
+			if l%2 != 0 {
+				return map[string]string{}, fmt.Errorf("GetResults() error: HSCAN result error.")
+			}
+
+			for i := 0; i < l; i += 2 {
+				results[items[i]] = items[i+1]
+			}
+		}
+
+		if cursor == 0 {
+			break
+		}
+	}
+	return results, nil
+}
