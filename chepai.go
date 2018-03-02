@@ -347,9 +347,9 @@ func (cp *Chepai) GetResults() (map[string]string, error) {
 	items := []string{}
 	results := map[string]string{}
 	cursor := 0
-	k := "results"
+
 	for {
-		v, err := redis.Values(conn.Do("HSCAN", k, cursor, "COUNT", 1024))
+		v, err := redis.Values(conn.Do("HSCAN", "results", cursor, "COUNT", 1024))
 		if err != nil {
 			return map[string]string{}, err
 		}
@@ -374,4 +374,24 @@ func (cp *Chepai) GetResults() (map[string]string, error) {
 		}
 	}
 	return results, nil
+}
+
+func (cp *Chepai) GetResultByID(ID string) (bool, int64, error) {
+	phase := cp.GetPhase(time.Now())
+	if phase != 3 {
+		return false, 0, fmt.Errorf("only phase 3 can get results, current phase: %v", phase)
+	}
+
+	conn := cp.pool.Get()
+	defer conn.Close()
+
+	price, err := redis.Int64(conn.Do("HGET", "results", ID))
+	switch err {
+	case redis.ErrNil:
+		return false, 0, nil
+	case nil:
+		return true, price, nil
+	default:
+		return false, 0, err
+	}
 }

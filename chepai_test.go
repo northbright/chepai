@@ -119,6 +119,12 @@ func ExampleChepai_ComputePhaseTwoLowestPrice() {
 	for k, v := range results {
 		log.Printf("ID: %v, price: %v", k, v)
 	}
+
+	done, price, err := cp.GetResultByID("10")
+	if err != nil {
+		log.Printf("GetResultByID(%v) error: %v", "10", err)
+	}
+	log.Printf("GetResultByID(%v): done: %v, price: %v", "10", done, price)
 	// Output:
 }
 
