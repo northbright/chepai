@@ -83,7 +83,7 @@ func ExampleChepai_ComputePhaseTwoLowestPrice() {
 		ID := fmt.Sprintf("%v", i+1)
 		cp.Bid(ID, 82700)
 	}
-	cp.Bid("9", 83300)
+	cp.Bid("9", 83000)
 	cp.Bid("10", 82400)
 
 	price, err := cp.ComputePhaseTwoLowestPrice()
@@ -105,9 +105,15 @@ func ExampleChepai_ComputePhaseTwoLowestPrice() {
 	record, _ = cp.GetBidRecordByID(phase, "2")
 	log.Printf("ID 2(phase %v) bid record: %v", phase, record)
 
+	time.Sleep(time.Second * 5)
+	if err = cp.GenerateResults(); err != nil {
+		log.Printf("GenerateResults(): error: %v", err)
+	}
+
 	// Output:
 }
 
+/*
 func ExampleChepai_ValidPhaseTwoPrice() {
 	pool := redishelper.NewRedisPool(":6379", "", 1000, 100, 60, true)
 	defer pool.Close()
@@ -130,7 +136,9 @@ func ExampleChepai_ValidPhaseTwoPrice() {
 	log.Printf("Phase Two Lowest Price: %v", lowestPrice)
 	// Output:
 }
+*/
 
+/*
 func ExampleChepai_Bid() {
 	var price int64
 
@@ -172,3 +180,4 @@ func ExampleChepai_Bid() {
 
 	// Output:
 }
+*/

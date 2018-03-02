@@ -272,3 +272,65 @@ func (cp *Chepai) GetBidRecordByID(phase int, ID string) (BidRecord, error) {
 	}
 	return record, nil
 }
+
+func (cp *Chepai) GenerateResults() error {
+	phase := cp.GetPhase(time.Now())
+	if phase != 3 {
+		return fmt.Errorf("only phase 3 can generate results, current phase: %v", phase)
+	}
+
+	conn := cp.pool.Get()
+	defer conn.Close()
+
+	pipedConn := cp.pool.Get()
+	defer pipedConn.Close()
+
+	k := "prices"
+	prices, err := redis.Int64s(conn.Do("ZREVRANGE", k, 0, -1))
+	if err != nil {
+		return err
+	}
+
+	pipedConn.Do("MULTI")
+	availableNum := cp.LicensePlateNum
+	for _, price := range prices {
+		if availableNum == 0 {
+			break
+		}
+
+		k := fmt.Sprintf("%v:num", price)
+		num, err := redis.Int64(conn.Do("GET", k))
+		if err != nil && err != redis.ErrNil {
+			return err
+		}
+
+		if num == 0 {
+			return fmt.Errorf("no member matches price: %v", price)
+		}
+
+		k = fmt.Sprintf("%v:ids", price)
+		stop := int64(-1)
+		// all IDs should be in results
+		if num < availableNum {
+			availableNum -= num
+
+		} else { // only first available num
+			stop = availableNum - 1
+			availableNum = 0
+		}
+
+		IDs, err := redis.Strings(conn.Do("ZRANGE", k, 0, stop))
+		if err != nil {
+			return err
+		}
+
+		for _, ID := range IDs {
+			pipedConn.Send("HSET", "results", ID, price)
+		}
+	}
+
+	if _, err = pipedConn.Do("EXEC"); err != nil {
+		return err
+	}
+	return nil
+}
