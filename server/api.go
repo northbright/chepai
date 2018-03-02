@@ -192,6 +192,39 @@ func getLicensePlateNum(c *gin.Context) {
 	log.Printf("getLicensePlateNum() OK, ID: %v, license plate num: %v", ID, licensePlateNum)
 }
 
+func getLowestPrice(c *gin.Context) {
+	var (
+		err         error
+		errMsg      string
+		success     = false
+		ID          string
+		phase       int
+		lowestPrice int64
+	)
+
+	defer func() {
+		if err != nil {
+			errMsg = err.Error()
+			log.Printf("getLowestPrice() error: %v", err)
+		}
+
+		c.JSON(200, gin.H{"success": success, "err": errMsg, "ID": ID, "phase": phase, "lowest_price": lowestPrice})
+	}()
+
+	if ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error: %v", ID)
+		return
+	}
+
+	phase = cp.GetPhase(time.Now())
+	if lowestPrice, err = cp.ComupteLowestPrice(phase); err != nil {
+		return
+	}
+
+	success = true
+	log.Printf("getLowestPrice() OK, ID: %v, phase: %v, lowest price: %v", ID, phase, lowestPrice)
+}
+
 func bid(c *gin.Context) {
 	type Req struct {
 		Price int64 `json:"price"`
