@@ -39,39 +39,33 @@ func getLoginID(c *gin.Context) (string, error) {
 
 func getTimeInfo(c *gin.Context) {
 	var (
-		err        error
-		errMsg     string
-		success    = false
-		ID         string
-		timeInfo   chepai.TimeInfo
-		myTimeInfo = struct {
-			BeginTime       int64 `json:"begin_time"`
-			PhaseOneEndTime int64 `json:"phase_one_end_time"`
-			PhaseTwoEndTime int64 `json:"phase_two_end_time"`
-		}{}
+		err      error
+		timeInfo chepai.TimeInfo
+		reply    = chepai.TimeInfoReply{}
 	)
 
 	defer func() {
 		if err != nil {
-			errMsg = err.Error()
+			reply.ErrMsg = err.Error()
 			log.Printf("getTimeInfo() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "time_info": myTimeInfo})
+		c.JSON(200, reply)
 	}()
 
-	if ID, err = getLoginID(c); err != nil {
-		log.Printf("getLoginID() error: %v", ID)
+	if reply.ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error")
 		return
 	}
 
 	timeInfo = cp.GetTimeInfo()
-	myTimeInfo.BeginTime = timeInfo.BeginTime.Unix()
-	myTimeInfo.PhaseOneEndTime = timeInfo.PhaseOneEndTime.Unix()
-	myTimeInfo.PhaseTwoEndTime = timeInfo.PhaseTwoEndTime.Unix()
+	reply.BeginTime = timeInfo.BeginTime.Unix()
+	reply.PhaseOneEndTime = timeInfo.PhaseOneEndTime.Unix()
+	reply.PhaseTwoEndTime = timeInfo.PhaseTwoEndTime.Unix()
 
-	success = true
-	log.Printf("getTimeInfo() OK, ID: %v, time info: %v, %v, %v", ID, timeInfo.BeginTime, timeInfo.PhaseOneEndTime, timeInfo.PhaseTwoEndTime)
+	reply.Success = true
+
+	log.Printf("getTimeInfo() OK, reply: %v", reply)
 }
 
 func validLogin(ID, password string) bool {
@@ -92,19 +86,18 @@ func loginPOST(c *gin.Context) {
 	}
 
 	var (
-		err     error
-		errMsg  string
-		success = false
-		r       Req
+		err   error
+		r     Req
+		reply chepai.Reply
 	)
 
 	defer func() {
 		if err != nil {
-			errMsg = err.Error()
+			reply.ErrMsg = err.Error()
 			log.Printf("LoginPOST() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg})
+		c.JSON(200, reply)
 	}()
 
 	if err = c.BindJSON(&r); err != nil {
@@ -127,97 +120,87 @@ func loginPOST(c *gin.Context) {
 	cookie := jwthelper.NewCookie(tokenString)
 	http.SetCookie(c.Writer, cookie)
 
-	success = true
-	log.Printf("LoginPOST() OK: ID: %v", r.ID)
+	reply.Success = true
+	log.Printf("LoginPOST() OK: reply: %v", reply)
 }
 
 func getStartPrice(c *gin.Context) {
 	var (
-		err        error
-		errMsg     string
-		success    = false
-		ID         string
-		startPrice int64
+		err   error
+		reply chepai.StartPriceReply
 	)
 
 	defer func() {
 		if err != nil {
-			errMsg = err.Error()
+			reply.ErrMsg = err.Error()
 			log.Printf("getStartPrice() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "start_price": startPrice})
+		c.JSON(200, reply)
 	}()
 
-	if ID, err = getLoginID(c); err != nil {
-		log.Printf("getLoginID() error: %v", ID)
+	if reply.ID, err = getLoginID(c); err != nil {
 		return
 	}
 
-	startPrice = cp.StartPrice
-	success = true
-	log.Printf("getStartPrice() OK, ID: %v, start price: %v", ID, startPrice)
+	reply.StartPrice = cp.StartPrice
+	reply.Success = true
+	log.Printf("getStartPrice() OK, %v", reply)
 }
 
 func getLicensePlateNum(c *gin.Context) {
 	var (
-		err             error
-		errMsg          string
-		success         = false
-		ID              string
-		licensePlateNum int64
+		err   error
+		reply chepai.LicensePlateNumReply
 	)
 
 	defer func() {
 		if err != nil {
-			errMsg = err.Error()
+			reply.ErrMsg = err.Error()
 			log.Printf("getLicensePlateNum() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "license_plate_num": licensePlateNum})
+		c.JSON(200, reply)
 	}()
 
-	if ID, err = getLoginID(c); err != nil {
-		log.Printf("getLoginID() error: %v", ID)
+	if reply.ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error")
 		return
 	}
 
-	licensePlateNum = cp.LicensePlateNum
-	success = true
-	log.Printf("getLicensePlateNum() OK, ID: %v, license plate num: %v", ID, licensePlateNum)
+	reply.LicensePlateNum = cp.LicensePlateNum
+	reply.Success = true
+	log.Printf("getLicensePlateNum() OK,  reply: %v", reply)
 }
 
 func getLowestPrice(c *gin.Context) {
 	var (
-		err         error
-		errMsg      string
-		success     = false
-		ID          string
-		phase       int
-		lowestPrice int64
+		err   error
+		phase int
+		reply chepai.LowestPriceReply
 	)
 
 	defer func() {
 		if err != nil {
-			errMsg = err.Error()
+			reply.ErrMsg = err.Error()
 			log.Printf("getLowestPrice() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "phase": phase, "lowest_price": lowestPrice})
+		c.JSON(200, reply)
 	}()
 
-	if ID, err = getLoginID(c); err != nil {
-		log.Printf("getLoginID() error: %v", ID)
+	if reply.ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error")
 		return
 	}
 
 	phase = cp.GetPhase(time.Now())
-	if lowestPrice, err = cp.ComupteLowestPrice(phase); err != nil {
+	if reply.LowestPrice, err = cp.ComupteLowestPrice(phase); err != nil {
 		return
 	}
 
-	success = true
-	log.Printf("getLowestPrice() OK, ID: %v, phase: %v, lowest price: %v", ID, phase, lowestPrice)
+	reply.Success = true
+	log.Printf("getLowestPrice() OK, reply: %v", reply)
 }
 
 func bid(c *gin.Context) {
@@ -226,22 +209,18 @@ func bid(c *gin.Context) {
 	}
 
 	var (
-		err     error
-		errMsg  string
-		success = false
-		r       Req
-		ID      string
-		phase   int
-		price   int64
+		err   error
+		r     Req
+		reply chepai.BidReply
 	)
 
 	defer func() {
 		if err != nil {
-			errMsg = err.Error()
+			reply.ErrMsg = err.Error()
 			log.Printf("bid() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "phase": phase, "price": price})
+		c.JSON(200, reply)
 	}()
 
 	if err = c.BindJSON(&r); err != nil {
@@ -249,121 +228,109 @@ func bid(c *gin.Context) {
 		return
 	}
 
-	price = r.Price
+	reply.Price = r.Price
 
-	if ID, err = getLoginID(c); err != nil {
-		log.Printf("getLoginID() error: %v", ID)
+	if reply.ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error")
 		return
 	}
 
-	phase = cp.GetPhase(time.Now())
+	reply.Phase = cp.GetPhase(time.Now())
 
-	if err = cp.Bid(ID, price); err != nil {
+	if err = cp.Bid(reply.ID, reply.Price); err != nil {
 		return
 	}
 
-	success = true
-	log.Printf("bid() OK: ID: %v, phase: %v, price: %v", ID, phase, r.Price)
+	reply.Success = true
+	log.Printf("bid() OK: reply: %v", reply)
 }
 
 func getBidRecords(c *gin.Context) {
 	var (
-		err     error
-		errMsg  string
-		success = false
-		ID      string
-		records []*chepai.BidRecord
+		err   error
+		reply chepai.BidRecordsReply
 	)
 
 	defer func() {
 		if err != nil {
-			errMsg = err.Error()
+			reply.ErrMsg = err.Error()
 			log.Printf("getBidRecords() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "bid_records": records})
+		c.JSON(200, reply)
 	}()
 
-	if ID, err = getLoginID(c); err != nil {
-		log.Printf("getLoginID() error: %v", ID)
+	if reply.ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error")
 		return
 	}
 
-	if records, err = cp.GetBidRecordsByID(ID); err != nil {
+	if reply.Records, err = cp.GetBidRecordsByID(reply.ID); err != nil {
 		log.Printf("GetBidRecordsByID() error: %v", err)
 		return
 	}
 
-	success = true
-	log.Printf("getBidRecords() OK, ID: %v:", ID)
-	for _, r := range records {
+	reply.Success = true
+	log.Printf("getBidRecords() OK, ID: %v:", reply.ID)
+	for _, r := range reply.Records {
 		log.Printf("%v: %v", r.Time, r.Price)
 	}
 }
 
 func getResults(c *gin.Context) {
 	var (
-		err     error
-		errMsg  string
-		success = false
-		ID      string
-		results map[string]string
+		err   error
+		reply chepai.ResultsReply
 	)
 
 	defer func() {
 		if err != nil {
-			errMsg = err.Error()
+			reply.ErrMsg = err.Error()
 			log.Printf("getResults() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "results": results})
+		c.JSON(200, reply)
 	}()
 
-	if ID, err = getLoginID(c); err != nil {
-		log.Printf("getLoginID() error: %v", ID)
+	if reply.ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error")
 		return
 	}
 
-	if results, err = cp.GetResults(); err != nil {
+	if reply.Results, err = cp.GetResults(); err != nil {
 		log.Printf("GetResults() error: %v", err)
 		return
 	}
 
-	success = true
-	log.Printf("getResults() OK, ID: %v, results: %v", ID, results)
+	reply.Success = true
+	log.Printf("getResults() OK, reply: %v", reply)
 }
 
 func getResult(c *gin.Context) {
 	var (
-		err     error
-		errMsg  string
-		success = false
-		ID      string
-		result  = struct {
-			Done  bool  `json:"done"`
-			Price int64 `json:"price"`
-		}{}
+		err   error
+		reply chepai.ResultReply
 	)
 
 	defer func() {
 		if err != nil {
-			errMsg = err.Error()
+			reply.ErrMsg = err.Error()
 			log.Printf("getResult() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "result": result})
+		c.JSON(200, reply)
 	}()
 
-	if ID, err = getLoginID(c); err != nil {
-		log.Printf("getLoginID() error: %v", ID)
+	if reply.ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error")
 		return
 	}
 
-	if result.Done, result.Price, err = cp.GetResultByID(ID); err != nil {
+	if reply.Done, reply.Price, err = cp.GetResultByID(reply.ID); err != nil {
 		log.Printf("GetResultByID() error: %v", err)
 		return
 	}
 
-	success = true
-	log.Printf("getResult() OK, ID: %v, result: %v", ID, result)
+	reply.Success = true
+	log.Printf("getResult() OK, reply: %v", reply)
 }
