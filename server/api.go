@@ -270,3 +270,35 @@ func bid(c *gin.Context) {
 	success = true
 	log.Printf("bid() OK: ID: %v, phase: %v, price: %v", ID, phase, r.Price)
 }
+
+func getResults(c *gin.Context) {
+	var (
+		err     error
+		errMsg  string
+		success = false
+		ID      string
+		results map[string]string
+	)
+
+	defer func() {
+		if err != nil {
+			errMsg = err.Error()
+			log.Printf("getResults() error: %v", err)
+		}
+
+		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "results": results})
+	}()
+
+	if ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error: %v", ID)
+		return
+	}
+
+	if results, err = cp.GetResults(); err != nil {
+		log.Printf("GetResults() error: %v", err)
+		return
+	}
+
+	success = true
+	log.Printf("getResults() OK, ID: %v, results: %v", ID, results)
+}
