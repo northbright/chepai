@@ -151,3 +151,35 @@ func (s *Session) GetStartPrice() (int64, error) {
 	}
 	return reply.StartPrice, nil
 }
+
+func (s *Session) GetLowestPrice() (int64, error) {
+	var reply chepai.LowestPriceReply
+
+	refURL, _ := url.Parse("/lowest_price")
+	urlStr := s.ServerURL.ResolveReference(refURL).String()
+
+	req, err := http.NewRequest("GET", urlStr, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	if err = json.Unmarshal(buf, &reply); err != nil {
+		return 0, err
+	}
+
+	if !reply.Success {
+		return 0, fmt.Errorf(reply.ErrMsg)
+	}
+	return reply.LowestPrice, nil
+}
