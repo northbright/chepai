@@ -35,11 +35,11 @@ func generatePhaseTwoPrice(startPrice int64) int64 {
 	x := rand.Intn(100)
 
 	switch {
-	case x < 25:
+	case x < 10:
 		price = startPrice
-	case x >= 25 && x < 50:
+	case x >= 10 && x < 30:
 		price = startPrice + 100
-	case x <= 50 && x < 75:
+	case x >= 30 && x < 65:
 		price = startPrice + 200
 	default:
 		price = startPrice + 300
