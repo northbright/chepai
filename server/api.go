@@ -39,30 +39,22 @@ func getLoginID(c *gin.Context) (string, error) {
 
 func getTimeInfo(c *gin.Context) {
 	var (
-		err      error
-		errMsg   string
-		success  = false
-		ID       string
-		timeInfo chepai.TimeInfo
+		err        error
+		errMsg     string
+		success    = false
+		ID         string
+		timeInfo   chepai.TimeInfo
+		myTimeInfo = struct {
+			BeginTime       int64 `json:"begin_time"`
+			PhaseOneEndTime int64 `json:"phase_one_end_time"`
+			PhaseTwoEndTime int64 `json:"phase_two_end_time"`
+		}{}
 	)
 
 	defer func() {
-		type MyTimeInfo struct {
-			BeginTime       int64
-			PhaseOneEndTime int64
-			PhaseTwoEndTime int64
-		}
-
-		var myTimeInfo MyTimeInfo
-
 		if err != nil {
 			errMsg = err.Error()
 			log.Printf("getTimeInfo() error: %v", err)
-		} else {
-			myTimeInfo = MyTimeInfo{timeInfo.BeginTime.Unix(),
-				timeInfo.PhaseOneEndTime.Unix(),
-				timeInfo.PhaseTwoEndTime.Unix(),
-			}
 		}
 
 		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "time_info": myTimeInfo})
@@ -74,6 +66,9 @@ func getTimeInfo(c *gin.Context) {
 	}
 
 	timeInfo = cp.GetTimeInfo()
+	myTimeInfo.BeginTime = timeInfo.BeginTime.Unix()
+	myTimeInfo.PhaseOneEndTime = timeInfo.PhaseOneEndTime.Unix()
+	myTimeInfo.PhaseTwoEndTime = timeInfo.PhaseTwoEndTime.Unix()
 
 	success = true
 	log.Printf("getTimeInfo() OK, ID: %v, time info: %v, %v, %v", ID, timeInfo.BeginTime, timeInfo.PhaseOneEndTime, timeInfo.PhaseTwoEndTime)
@@ -310,8 +305,8 @@ func getResult(c *gin.Context) {
 		success = false
 		ID      string
 		result  = struct {
-			Done  bool
-			Price int64
+			Done  bool  `json:"done"`
+			Price int64 `json:"price"`
 		}{}
 	)
 
