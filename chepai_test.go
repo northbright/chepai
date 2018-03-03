@@ -49,6 +49,71 @@ func ExampleChepai_GetPhase() {
 	// Output:
 }
 
+func ExampleChepai_ValidPhaseTwoPrice() {
+	pool := redishelper.NewRedisPool(":6379", "", 1000, 100, 60, true)
+	defer pool.Close()
+
+	cp := chepai.New(pool, 0, 30, 30, 83000, 10)
+	cp.FlushDB()
+
+	prices := []int64{82700, 82800, 82900, 83000, 83100, 83200, 83300, 83301, 82699, 84400}
+
+	lowestPrice, err := cp.ComputePhaseTwoLowestPrice()
+	if err != nil {
+		log.Printf("ComputePhaseTwoLowestPrice() error: %v", err)
+		return
+	}
+
+	for _, price := range prices {
+		valid := cp.ValidPhaseTwoPrice(lowestPrice, price)
+		log.Printf("%v: %v", price, valid)
+	}
+	log.Printf("Phase Two Lowest Price: %v", lowestPrice)
+	// Output:
+}
+
+func ExampleChepai_Bid() {
+	var price int64
+
+	pool := redishelper.NewRedisPool(":6379", "", 1000, 100, 60, true)
+	defer pool.Close()
+
+	cp := chepai.New(pool, 1, 5, 5, 83000, 10)
+	cp.FlushDB()
+
+	price = 83000
+	log.Printf("1st bid: price: %v, %v", price, cp.Bid("1", price))
+
+	time.Sleep(time.Second * 2)
+	price = 83400
+	log.Printf("2nd bid: price: %v, %v", price, cp.Bid("1", price))
+
+	price = 83000
+	log.Printf("3rd bid: price: %v, %v", price, cp.Bid("1", price))
+
+	price = 83000
+	log.Printf("4th bid: price: %v, %v", price, cp.Bid("1", price))
+
+	time.Sleep(time.Second * 5)
+	price = 83001
+	log.Printf("5th bid: price: %v, %v", price, cp.Bid("1", price))
+
+	price = 83100
+	log.Printf("6th bid: price: %v, %v", price, cp.Bid("1", price))
+
+	price = 83200
+	log.Printf("7th bid: price: %v, %v", price, cp.Bid("1", price))
+
+	price = 83200
+	log.Printf("8th bid for ID 2: price: %v, %v", price, cp.Bid("2", price))
+
+	time.Sleep(time.Second * 5)
+	price = 83300
+	log.Printf("5th bid: price: %v, %v", price, cp.Bid("1", price))
+
+	// Output:
+}
+
 func ExampleChepai_ComputePhaseTwoLowestPrice() {
 	pool := redishelper.NewRedisPool(":6379", "", 1000, 100, 60, true)
 	defer pool.Close()
@@ -127,72 +192,3 @@ func ExampleChepai_ComputePhaseTwoLowestPrice() {
 	log.Printf("GetResultByID(%v): done: %v, price: %v", "10", done, price)
 	// Output:
 }
-
-/*
-func ExampleChepai_ValidPhaseTwoPrice() {
-	pool := redishelper.NewRedisPool(":6379", "", 1000, 100, 60, true)
-	defer pool.Close()
-
-	cp := chepai.New(pool, 0, 30, 30, 83000, 10)
-	cp.FlushDB()
-
-	prices := []int64{82700, 82800, 82900, 83000, 83100, 83200, 83300, 83301, 82699, 84400}
-
-	lowestPrice, err := cp.ComputePhaseTwoLowestPrice()
-	if err != nil {
-		log.Printf("ComputePhaseTwoLowestPrice() error: %v", err)
-		return
-	}
-
-	for _, price := range prices {
-		valid := cp.ValidPhaseTwoPrice(lowestPrice, price)
-		log.Printf("%v: %v", price, valid)
-	}
-	log.Printf("Phase Two Lowest Price: %v", lowestPrice)
-	// Output:
-}
-*/
-
-/*
-func ExampleChepai_Bid() {
-	var price int64
-
-	pool := redishelper.NewRedisPool(":6379", "", 1000, 100, 60, true)
-	defer pool.Close()
-
-	cp := chepai.New(pool, 1, 5, 5, 83000, 10)
-	cp.FlushDB()
-
-	price = 83000
-	log.Printf("1st bid: price: %v, %v", price, cp.Bid("1", price))
-
-	time.Sleep(time.Second * 2)
-	price = 83400
-	log.Printf("2nd bid: price: %v, %v", price, cp.Bid("1", price))
-
-	price = 83000
-	log.Printf("3rd bid: price: %v, %v", price, cp.Bid("1", price))
-
-	price = 83000
-	log.Printf("4th bid: price: %v, %v", price, cp.Bid("1", price))
-
-	time.Sleep(time.Second * 5)
-	price = 83001
-	log.Printf("5th bid: price: %v, %v", price, cp.Bid("1", price))
-
-	price = 83100
-	log.Printf("6th bid: price: %v, %v", price, cp.Bid("1", price))
-
-	price = 83200
-	log.Printf("7th bid: price: %v, %v", price, cp.Bid("1", price))
-
-	price = 83200
-	log.Printf("8th bid for ID 2: price: %v, %v", price, cp.Bid("2", price))
-
-	time.Sleep(time.Second * 5)
-	price = 83300
-	log.Printf("5th bid: price: %v, %v", price, cp.Bid("1", price))
-
-	// Output:
-}
-*/
