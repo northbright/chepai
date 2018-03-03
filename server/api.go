@@ -26,7 +26,7 @@ func getLoginID(c *gin.Context) (string, error) {
 		}
 
 		// Convert interface{} to string
-		ID, ok := m["ID"].(string)
+		ID, ok := m["id"].(string)
 		if !ok {
 			return "", fmt.Errorf("failed to convert interface{} to string")
 		}
@@ -65,7 +65,7 @@ func getTimeInfo(c *gin.Context) {
 			}
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "ID": ID, "time_info": myTimeInfo})
+		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "time_info": myTimeInfo})
 	}()
 
 	if ID, err = getLoginID(c); err != nil {
@@ -124,7 +124,7 @@ func loginPOST(c *gin.Context) {
 
 	signer := jwthelper.NewRSASHASigner([]byte(rsaPrivPEM))
 	tokenString, err := signer.SignedString(
-		jwthelper.NewClaim("ID", r.ID),
+		jwthelper.NewClaim("id", r.ID),
 	)
 	if err != nil {
 		return
@@ -151,7 +151,7 @@ func getStartPrice(c *gin.Context) {
 			log.Printf("getStartPrice() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "ID": ID, "start_price": startPrice})
+		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "start_price": startPrice})
 	}()
 
 	if ID, err = getLoginID(c); err != nil {
@@ -179,7 +179,7 @@ func getLicensePlateNum(c *gin.Context) {
 			log.Printf("getLicensePlateNum() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "ID": ID, "license_plate_num": licensePlateNum})
+		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "license_plate_num": licensePlateNum})
 	}()
 
 	if ID, err = getLoginID(c); err != nil {
@@ -208,7 +208,7 @@ func getLowestPrice(c *gin.Context) {
 			log.Printf("getLowestPrice() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "ID": ID, "phase": phase, "lowest_price": lowestPrice})
+		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "phase": phase, "lowest_price": lowestPrice})
 	}()
 
 	if ID, err = getLoginID(c); err != nil {
@@ -246,7 +246,7 @@ func bid(c *gin.Context) {
 			log.Printf("bid() error: %v", err)
 		}
 
-		c.JSON(200, gin.H{"success": success, "err": errMsg, "ID": ID, "phase": phase, "price": price})
+		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "phase": phase, "price": price})
 	}()
 
 	if err = c.BindJSON(&r); err != nil {
