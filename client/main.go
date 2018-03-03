@@ -17,6 +17,7 @@ import (
 // Config represents the app settings.
 type Config struct {
 	ServerAddr string `json:"server_addr"`
+	ClientName string `json:"client_name"`
 	BidderNum  int64  `json:"bidder_num"`
 }
 
@@ -49,7 +50,7 @@ func main() {
 		return
 	}
 
-	Emu(config.ServerAddr, config.BidderNum)
+	Emu(config)
 }
 
 // init initializes path variables.
@@ -74,14 +75,14 @@ func loadConfig() error {
 	return nil
 }
 
-func Emu(serverURL string, bidderNum int64) {
-	sem := make(chan struct{}, bidderNum)
+func Emu(config Config) {
+	sem := make(chan struct{}, config.BidderNum)
 
-	for i := int64(0); i < bidderNum; i++ {
+	for i := int64(0); i < config.BidderNum; i++ {
 		// After first "concurrency" amount of goroutines started,
 		// It'll block starting new goroutines until one running goroutine finishs.
 		sem <- struct{}{}
-		go EmuBid(sem, serverURL, i)
+		go EmuBid(config, sem, i)
 
 	}
 
@@ -94,10 +95,10 @@ func Emu(serverURL string, bidderNum int64) {
 	}
 }
 
-func EmuBid(sem chan struct{}, serverURL string, i int64) {
+func EmuBid(config Config, sem chan struct{}, i int64) {
 	defer func() { <-sem }()
 	// New session
-	s, err := NewSession(serverURL)
+	s, err := NewSession(config.ServerAddr)
 	if err != nil {
 		log.Printf("NewSession() error: %v", err)
 		return
@@ -105,6 +106,7 @@ func EmuBid(sem chan struct{}, serverURL string, i int64) {
 
 	// Login
 	ID := strconv.FormatInt(i, 10)
+	ID = fmt.Sprintf("%s:%s", config.ClientName, ID)
 	if err = s.Login(ID, ID); err != nil {
 		log.Printf("Login() error: %v", err)
 		return
