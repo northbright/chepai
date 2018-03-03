@@ -307,16 +307,17 @@ func (cp *Chepai) getBidRecordByID(conn redis.Conn, phase int, ID string) (*BidR
 }
 
 func (cp *Chepai) GenerateResults() error {
-	phase := cp.GetPhase(time.Now())
-	if phase != 3 {
-		return fmt.Errorf("only phase 3 can generate results, current phase: %v", phase)
-	}
-
 	conn := cp.pool.Get()
 	defer conn.Close()
 
 	pipedConn := cp.pool.Get()
 	defer pipedConn.Close()
+
+	// Clear previous results
+	_, err := conn.Do("DEL", "results")
+	if err != nil {
+		return err
+	}
 
 	k := "prices"
 	prices, err := redis.Int64s(conn.Do("ZREVRANGE", k, 0, -1))
@@ -346,7 +347,6 @@ func (cp *Chepai) GenerateResults() error {
 		// all IDs should be in results
 		if num < availableNum {
 			availableNum -= num
-
 		} else { // only first available num
 			stop = availableNum - 1
 			availableNum = 0
@@ -357,6 +357,7 @@ func (cp *Chepai) GenerateResults() error {
 			return err
 		}
 
+		// Append result
 		for _, ID := range IDs {
 			pipedConn.Send("HSET", "results", ID, price)
 		}
@@ -369,11 +370,6 @@ func (cp *Chepai) GenerateResults() error {
 }
 
 func (cp *Chepai) GetResults() (map[string]string, error) {
-	phase := cp.GetPhase(time.Now())
-	if phase != 3 {
-		return map[string]string{}, fmt.Errorf("only phase 3 can get results, current phase: %v", phase)
-	}
-
 	conn := cp.pool.Get()
 	defer conn.Close()
 
