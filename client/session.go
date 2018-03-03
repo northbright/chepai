@@ -52,9 +52,6 @@ func (s *Session) Login(ID, password string) error {
 		return err
 	}
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Accept", "*/*")
-
 	resp, err := s.client.Do(req)
 	if err != nil {
 		return err
@@ -182,4 +179,42 @@ func (s *Session) GetLowestPrice() (int64, error) {
 		return 0, fmt.Errorf(reply.ErrMsg)
 	}
 	return reply.LowestPrice, nil
+}
+
+func (s *Session) Bid(price int64) error {
+	var reply chepai.BidReply
+
+	data := struct {
+		Price int64 `json:"price"`
+	}{price}
+
+	buf, _ := json.Marshal(data)
+
+	refURL, _ := url.Parse("/bid")
+	urlStr := s.ServerURL.ResolveReference(refURL).String()
+
+	req, err := http.NewRequest("POST", urlStr, bytes.NewReader(buf))
+	if err != nil {
+		return err
+	}
+
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Get reply
+	if buf, err = ioutil.ReadAll(resp.Body); err != nil {
+		return err
+	}
+
+	if err = json.Unmarshal(buf, &reply); err != nil {
+		return err
+	}
+
+	if !reply.Success {
+		return fmt.Errorf(reply.ErrMsg)
+	}
+	return nil
 }
