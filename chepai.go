@@ -23,8 +23,8 @@ type Chepai struct {
 }
 
 type BidRecord struct {
-	Price int64 `redis:"price"`
-	Time  int64 `redis:"time"`
+	Price int64 `redis:"price" json:"price"`
+	Time  int64 `redis:"time" json:"time"`
 }
 
 func New(pool *redis.Pool, startAfter, phaseOneDuration, phaseTwoDuration int, startPrice, licensePlateNum int64) *Chepai {
@@ -243,34 +243,67 @@ func (cp *Chepai) FlushDB() error {
 	return nil
 }
 
-func (cp *Chepai) GetBidRecordByID(phase int, ID string) (BidRecord, error) {
-	if phase != 1 && phase != 2 {
-		return BidRecord{}, fmt.Errorf("incorrect phase: %v", phase)
-	}
+func (cp *Chepai) GetBidRecordsByID(ID string) ([]*BidRecord, error) {
+	var records []*BidRecord
+
+	phase := cp.GetPhase(time.Now())
 
 	conn := cp.pool.Get()
 	defer conn.Close()
 
+	switch phase {
+	case 0:
+		return nil, nil
+	case 1:
+		record, err := cp.getBidRecordByID(conn, phase, ID)
+		if err != nil {
+			return nil, err
+		}
+		if record != nil {
+			records = append(records, record)
+		}
+		return records, nil
+
+	case 2, 3:
+		phases := []int{1, 2}
+		for i := 0; i < len(phases); i++ {
+			record, err := cp.getBidRecordByID(conn, phases[i], ID)
+			if err != nil {
+				return nil, err
+			}
+
+			if record != nil {
+				records = append(records, record)
+			}
+		}
+		return records, nil
+	default:
+		return nil, nil
+	}
+}
+
+func (cp *Chepai) getBidRecordByID(conn redis.Conn, phase int, ID string) (*BidRecord, error) {
+	var record BidRecord
+
 	k := fmt.Sprintf("record:%v:phase:%v", ID, phase)
 	exists, err := redis.Bool(conn.Do("EXISTS", k))
 	if err != nil {
-		return BidRecord{}, err
+		return nil, err
 	}
 
 	if !exists {
-		return BidRecord{}, nil
+		return nil, nil
 	}
 
 	values, err := redis.Values(conn.Do("HGETALL", k))
 	if err != nil {
-		return BidRecord{}, err
+		return nil, err
 	}
 
-	var record BidRecord
 	if err = redis.ScanStruct(values, &record); err != nil {
-		return BidRecord{}, err
+		return nil, err
 	}
-	return record, nil
+	return &record, nil
 }
 
 func (cp *Chepai) GenerateResults() error {

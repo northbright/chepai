@@ -135,12 +135,11 @@ func ExampleChepai_ComputePhaseTwoLowestPrice() {
 		cp.Bid(ID, 83000)
 	}
 
-	phase := cp.GetPhase(time.Now())
-	record, _ := cp.GetBidRecordByID(phase, "2")
-	log.Printf("ID 2(phase %v) bid record: %v", phase, record)
-
-	record, err = cp.GetBidRecordByID(phase, "100")
-	log.Printf("ID 100(phase %v) bid record: %v, %v", phase, record, err)
+	records, _ := cp.GetBidRecordsByID("10")
+	log.Printf("ID 10 bid records(phase 1):")
+	for _, v := range records {
+		log.Printf("%v", v)
+	}
 
 	// Phase 2
 	time.Sleep(time.Second * 2)
@@ -150,6 +149,12 @@ func ExampleChepai_ComputePhaseTwoLowestPrice() {
 	}
 	cp.Bid("9", 83000)
 	cp.Bid("10", 82400)
+
+	records, _ = cp.GetBidRecordsByID("10")
+	log.Printf("ID 10 bid records(phase 2):")
+	for _, v := range records {
+		log.Printf("%v", v)
+	}
 
 	price, err := cp.ComputePhaseTwoLowestPrice()
 	if err != nil {
@@ -166,15 +171,12 @@ func ExampleChepai_ComputePhaseTwoLowestPrice() {
 
 	log.Printf("phase 2: bidder num: %v", bidderNum)
 
-	phase = cp.GetPhase(time.Now())
-	record, _ = cp.GetBidRecordByID(phase, "2")
-	log.Printf("ID 2(phase %v) bid record: %v", phase, record)
-
 	time.Sleep(time.Second * 5)
 	if err = cp.GenerateResults(); err != nil {
 		log.Printf("GenerateResults(): error: %v", err)
 	}
 
+	// Phase 3
 	results, err := cp.GetResults()
 	if err != nil {
 		log.Printf("GetResults() error: %v", err)
@@ -184,6 +186,17 @@ func ExampleChepai_ComputePhaseTwoLowestPrice() {
 	for k, v := range results {
 		log.Printf("ID: %v, price: %v", k, v)
 	}
+
+	records, _ = cp.GetBidRecordsByID("10")
+	log.Printf("ID 10 bid records(phase 3):")
+	for _, v := range records {
+		log.Printf("%v", v)
+	}
+
+	if records, err = cp.GetBidRecordsByID("100"); err != nil {
+		log.Printf("cp.GetBidRecordsByID(100) error: %v", err)
+	}
+	log.Printf("records: %v", records)
 
 	done, price, err := cp.GetResultByID("10")
 	if err != nil {
