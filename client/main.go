@@ -116,8 +116,15 @@ func EmuBid(sem chan struct{}, serverURL string, i int64) {
 		log.Printf("GetTimeInfo() error: %v", err)
 		return
 	}
-
 	log.Printf("time info: %v", info)
+
+	// Get start price
+	startPrice, err := s.GetStartPrice()
+	if err != nil {
+		log.Printf("GetStartPrice() error: %v", err)
+		return
+	}
+	log.Printf("start price: %v", startPrice)
 
 	log.Printf("i: %v\n", i)
 }

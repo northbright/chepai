@@ -123,7 +123,7 @@ func (s *Session) GetTimeInfo() (*chepai.TimeInfo, error) {
 func (s *Session) GetStartPrice() (int64, error) {
 	var reply chepai.StartPriceReply
 
-	refURL, _ := url.Parse("/time_info")
+	refURL, _ := url.Parse("/start_price")
 	urlStr := s.ServerURL.ResolveReference(refURL).String()
 
 	req, err := http.NewRequest("GET", urlStr, nil)
