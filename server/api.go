@@ -302,3 +302,38 @@ func getResults(c *gin.Context) {
 	success = true
 	log.Printf("getResults() OK, ID: %v, results: %v", ID, results)
 }
+
+func getResult(c *gin.Context) {
+	var (
+		err     error
+		errMsg  string
+		success = false
+		ID      string
+		result  = struct {
+			Done  bool
+			Price int64
+		}{}
+	)
+
+	defer func() {
+		if err != nil {
+			errMsg = err.Error()
+			log.Printf("getResult() error: %v", err)
+		}
+
+		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "result": result})
+	}()
+
+	if ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error: %v", ID)
+		return
+	}
+
+	if result.Done, result.Price, err = cp.GetResultByID(ID); err != nil {
+		log.Printf("GetResultByID() error: %v", err)
+		return
+	}
+
+	success = true
+	log.Printf("getResult() OK, ID: %v, result: %v", ID, result)
+}
