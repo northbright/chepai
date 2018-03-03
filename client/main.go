@@ -9,15 +9,15 @@ import (
 	"net/url"
 	"path"
 	"strconv"
+	"time"
 
 	"github.com/northbright/pathhelper"
 )
 
 // Config represents the app settings.
 type Config struct {
-	ServerAddr  string `json:"server_addr"`
-	BidderNum   int64  `json:"bidder_num"`
-	Concurrency int64  `json:"concurrency"`
+	ServerAddr string `json:"server_addr"`
+	BidderNum  int64  `json:"bidder_num"`
 }
 
 var (
@@ -49,7 +49,7 @@ func main() {
 		return
 	}
 
-	Emu(config.ServerAddr, config.BidderNum, config.Concurrency)
+	Emu(config.ServerAddr, config.BidderNum)
 }
 
 // init initializes path variables.
@@ -74,8 +74,8 @@ func loadConfig() error {
 	return nil
 }
 
-func Emu(serverURL string, bidderNum, concurrency int64) {
-	sem := make(chan struct{}, concurrency)
+func Emu(serverURL string, bidderNum int64) {
+	sem := make(chan struct{}, bidderNum)
 
 	for i := int64(0); i < bidderNum; i++ {
 		// After first "concurrency" amount of goroutines started,
@@ -116,7 +116,6 @@ func EmuBid(sem chan struct{}, serverURL string, i int64) {
 		log.Printf("GetTimeInfo() error: %v", err)
 		return
 	}
-	log.Printf("time info: %v", info)
 
 	// Get start price
 	startPrice, err := s.GetStartPrice()
@@ -124,7 +123,30 @@ func EmuBid(sem chan struct{}, serverURL string, i int64) {
 		log.Printf("GetStartPrice() error: %v", err)
 		return
 	}
-	log.Printf("start price: %v", startPrice)
+
+	// Generate sleep duration before phase one end
+	duration := generateSleepTime(info.PhaseOneEndTime)
+	time.Sleep(duration)
+	if err = s.Bid(startPrice); err != nil {
+		log.Printf("bid on phase one error: %v", err)
+		return
+	}
+
+	// Generate sleep duration before phase two end
+	duration = generateSleepTime(info.PhaseTwoEndTime)
+	time.Sleep(duration)
+	lowestPrice, err := s.GetLowestPrice()
+	if err != nil {
+		log.Printf("get lowest price on phase two error: %v", err)
+		return
+	}
+
+	// Generate bid price for phase two
+	price := generatePhaseTwoPrice(lowestPrice)
+	if err = s.Bid(price); err != nil {
+		log.Printf("bid on phase two error: %v", err)
+		return
+	}
 
 	log.Printf("i: %v\n", i)
 }
