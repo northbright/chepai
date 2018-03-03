@@ -266,6 +266,41 @@ func bid(c *gin.Context) {
 	log.Printf("bid() OK: ID: %v, phase: %v, price: %v", ID, phase, r.Price)
 }
 
+func getBidRecords(c *gin.Context) {
+	var (
+		err     error
+		errMsg  string
+		success = false
+		ID      string
+		records []*chepai.BidRecord
+	)
+
+	defer func() {
+		if err != nil {
+			errMsg = err.Error()
+			log.Printf("getBidRecords() error: %v", err)
+		}
+
+		c.JSON(200, gin.H{"success": success, "err": errMsg, "id": ID, "bid_records": records})
+	}()
+
+	if ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error: %v", ID)
+		return
+	}
+
+	if records, err = cp.GetBidRecordsByID(ID); err != nil {
+		log.Printf("GetBidRecordsByID() error: %v", err)
+		return
+	}
+
+	success = true
+	log.Printf("getBidRecords() OK, ID: %v:", ID)
+	for _, r := range records {
+		log.Printf("%v: %v", r.Time, r.Price)
+	}
+}
+
 func getResults(c *gin.Context) {
 	var (
 		err     error

@@ -72,6 +72,7 @@ func main() {
 	r.GET("/license_plate_num", getLicensePlateNum)
 	r.GET("/lowest_price", getLowestPrice)
 	r.POST("/bid", bid)
+	r.GET("/bid_records", getBidRecords)
 	r.GET("/results", getResults)
 	r.GET("/result", getResult)
 	// Get student names by phone num.
