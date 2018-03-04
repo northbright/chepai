@@ -23,9 +23,9 @@ func generatePhaseTwoSleepTime(beginTime, endTime time.Time) (time.Duration, err
 	d := 0
 	switch {
 	case x < 60: // 60%: wakeup at end time - 3 seconds
-		d = -3
-	case x >= 60 && x < 80: // 20%: wakeup at end time - 5 seconds
 		d = -5
+	case x >= 60 && x < 80: // 20%: wakeup at end time - 5 seconds
+		d = -3
 	default: // 10%: wakeup at end time - 8 seconds
 		d = -8
 	}
