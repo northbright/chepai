@@ -7,34 +7,9 @@ import (
 	"github.com/northbright/random"
 )
 
-func generatePhaseOneSleepTime(beginTime, endTime time.Time) (time.Duration, error) {
+func genSleepTime(beginTime, endTime time.Time) (time.Duration, error) {
 	pad := time.Millisecond * 100
 	wakeupTime, err := random.RandTime(beginTime, endTime, pad)
-	if err != nil {
-		return 0, err
-	}
-	return wakeupTime.Sub(time.Now()), nil
-}
-
-func generatePhaseTwoSleepTime(beginTime, endTime time.Time) (time.Duration, error) {
-	rand.Seed(time.Now().UnixNano())
-	x := rand.Intn(100)
-
-	d := 0
-	switch {
-	case x < 60: // 60%: wakeup at end time - 3 seconds
-		d = -5
-	case x >= 60 && x < 80: // 20%: wakeup at end time - 5 seconds
-		d = -3
-	default: // 10%: wakeup at end time - 8 seconds
-		d = -8
-	}
-
-	min := endTime.Add(time.Duration(d) * time.Second)
-	max := endTime
-	pad := time.Millisecond * 500
-
-	wakeupTime, err := random.RandTime(min, max, pad)
 	if err != nil {
 		return 0, err
 	}
