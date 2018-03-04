@@ -19,6 +19,7 @@ type Config struct {
 	ServerAddr       string `json:"server_addr"`
 	RedisServer      string `json:"redis_server"`
 	RedisPassword    string `json:"redis_password"`
+	RedisPoolSize    int    `json:"redis_pool_size"`
 	StartAfter       int    `json:"start_after"`
 	PhaseOneDuration int    `json:"phase_one_duration"`
 	PhaseTwoDuration int    `json:"phase_two_duration"`
@@ -50,7 +51,7 @@ func main() {
 	}
 
 	// New a redis pool
-	pool = redishelper.NewRedisPool(":6379", "", 1000, 100, 60, true)
+	pool = redishelper.NewRedisPool(":6379", "", config.RedisPoolSize, 100, 60, true)
 	defer pool.Close()
 
 	// New a Chepai instance
