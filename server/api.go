@@ -64,7 +64,7 @@ func getTimeInfo(c *gin.Context) {
 
 	reply.Success = true
 
-	log.Printf("getTimeInfo() OK, reply: %v", reply)
+	//log.Printf("getTimeInfo() OK, reply: %v", reply)
 }
 
 func validLogin(ID, password string) bool {
@@ -120,7 +120,7 @@ func loginPOST(c *gin.Context) {
 	http.SetCookie(c.Writer, cookie)
 
 	reply.Success = true
-	log.Printf("LoginPOST() OK: reply: %v", reply)
+	//log.Printf("LoginPOST() OK: reply: %v", reply)
 }
 
 func getStartPrice(c *gin.Context) {
@@ -144,7 +144,7 @@ func getStartPrice(c *gin.Context) {
 
 	reply.StartPrice = cp.StartPrice
 	reply.Success = true
-	log.Printf("getStartPrice() OK, %v", reply)
+	//log.Printf("getStartPrice() OK, %v", reply)
 }
 
 func getLicensePlateNum(c *gin.Context) {
@@ -169,7 +169,7 @@ func getLicensePlateNum(c *gin.Context) {
 
 	reply.LicensePlateNum = cp.LicensePlateNum
 	reply.Success = true
-	log.Printf("getLicensePlateNum() OK,  reply: %v", reply)
+	//log.Printf("getLicensePlateNum() OK,  reply: %v", reply)
 }
 
 func getLowestPrice(c *gin.Context) {
@@ -199,7 +199,7 @@ func getLowestPrice(c *gin.Context) {
 	}
 
 	reply.Success = true
-	log.Printf("getLowestPrice() OK, reply: %v", reply)
+	//log.Printf("getLowestPrice() OK, reply: %v", reply)
 }
 
 func bid(c *gin.Context) {
@@ -241,7 +241,7 @@ func bid(c *gin.Context) {
 	}
 
 	reply.Success = true
-	log.Printf("bid() OK: reply: %v", reply)
+	//log.Printf("bid() OK: reply: %v", reply)
 }
 
 func getBidRecords(c *gin.Context) {
@@ -302,7 +302,7 @@ func getResults(c *gin.Context) {
 	}
 
 	reply.Success = true
-	log.Printf("getResults() OK, reply: %v", reply)
+	//log.Printf("getResults() OK, reply: %v", reply)
 }
 
 func getResult(c *gin.Context) {
@@ -331,5 +331,5 @@ func getResult(c *gin.Context) {
 	}
 
 	reply.Success = true
-	log.Printf("getResult() OK, reply: %v", reply)
+	//log.Printf("getResult() OK, reply: %v", reply)
 }
