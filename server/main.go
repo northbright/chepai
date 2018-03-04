@@ -75,19 +75,7 @@ func main() {
 	r.GET("/bid_records", getBidRecords)
 	r.GET("/results", getResults)
 	r.GET("/result", getResult)
-	// Get student names by phone num.
-	/*
-		r.GET("/api/get-names-by-phone-num/:phone_num", getNamesByPhoneNum)
 
-		// Get classes by name and phone num.
-		r.GET("/api/get-classes-by-name-and-phone-num/:name/:phone_num", getClassesByNameAndPhoneNum)
-
-		// Get available periods for the category of the class.
-		r.GET("/api/get-available-periods/:class", getAvailablePeriods)
-
-		// Post request.
-		r.POST("/api/request", postRequest)
-	*/
 	r.Run(config.ServerAddr)
 }
 
