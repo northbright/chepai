@@ -91,7 +91,7 @@ func Emu(config Config) {
 	// Make sure wait all goroutines to finish.
 	for j := 0; j < cap(sem); j++ {
 		sem <- struct{}{}
-		log.Printf("----- j: %v\n", j)
+		//log.Printf("----- j: %v\n", j)
 	}
 }
 
@@ -132,7 +132,6 @@ func EmuBid(config Config, sem chan struct{}, i int64) {
 		log.Printf("gen phase one sleep time error: %v", err)
 		return
 	}
-	log.Printf("d1: %v", duration)
 	time.Sleep(duration)
 
 	if err = s.Bid(startPrice); err != nil {
@@ -146,7 +145,6 @@ func EmuBid(config Config, sem chan struct{}, i int64) {
 		log.Printf("gen phase two sleep time error: %v", err)
 		return
 	}
-	log.Printf("d2: %v", duration)
 	time.Sleep(duration)
 
 	lowestPrice, err := s.GetLowestPrice()
@@ -162,5 +160,5 @@ func EmuBid(config Config, sem chan struct{}, i int64) {
 		return
 	}
 
-	log.Printf("i: %v\n", i)
+	//log.Printf("i: %v\n", i)
 }
