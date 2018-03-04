@@ -3,16 +3,24 @@ package main
 import (
 	"math/rand"
 	"time"
+
+	"github.com/northbright/random"
 )
 
-func generateSleepTime(endTime time.Time) time.Duration {
-	var d int
+func generatePhaseOneSleepTime(beginTime, endTime time.Time) (time.Duration, error) {
+	pad := time.Millisecond * 100
+	wakeupTime, err := random.RandTime(beginTime, endTime, pad)
+	if err != nil {
+		return 0, err
+	}
+	return wakeupTime.Sub(time.Now()), nil
+}
 
-	t := time.Now()
-
-	rand.Seed(t.UnixNano())
+func generatePhaseTwoSleepTime(beginTime, endTime time.Time) (time.Duration, error) {
+	rand.Seed(time.Now().UnixNano())
 	x := rand.Intn(100)
 
+	d := 0
 	switch {
 	case x < 60: // 60%: wakeup at end time - 3 seconds
 		d = -3
@@ -22,8 +30,15 @@ func generateSleepTime(endTime time.Time) time.Duration {
 		d = -8
 	}
 
-	wakeupTime := endTime.Add(time.Duration(d) * time.Second)
-	return wakeupTime.Sub(t)
+	min := endTime.Add(time.Duration(d) * time.Second)
+	max := endTime
+	pad := time.Millisecond * 500
+
+	wakeupTime, err := random.RandTime(min, max, pad)
+	if err != nil {
+		return 0, err
+	}
+	return wakeupTime.Sub(time.Now()), nil
 }
 
 func generatePhaseTwoPrice(startPrice int64) int64 {
