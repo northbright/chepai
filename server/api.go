@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	//"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/northbright/chepai"
 	"github.com/northbright/jwthelper"
