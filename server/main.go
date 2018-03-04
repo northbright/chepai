@@ -63,6 +63,12 @@ func main() {
 	)
 
 	log.Printf("cp: %v", cp)
+	// Flush DB before new chepai
+	if err = cp.FlushDB(); err != nil {
+		log.Printf("FlushDB() error: %v")
+		return
+	}
+
 	r := gin.Default()
 
 	// Core APIs.
