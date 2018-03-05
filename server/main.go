@@ -73,15 +73,15 @@ func main() {
 	r := gin.Default()
 
 	// Core APIs.
-	r.POST("/login", loginPOST)
-	r.GET("/time_info", getTimeInfo)
-	r.GET("/start_price", getStartPrice)
-	r.GET("/license_plate_num", getLicensePlateNum)
-	r.GET("/lowest_price", getLowestPrice)
-	r.POST("/bid", bid)
-	r.GET("/bid_records", getBidRecords)
-	r.GET("/results", getResults)
-	r.GET("/result", getResult)
+	r.POST("/api/login", loginPOST)
+	r.GET("/api/time_info", getTimeInfo)
+	r.GET("/api/start_price", getStartPrice)
+	r.GET("/api/license_plate_num", getLicensePlateNum)
+	r.GET("/api/lowest_price", getLowestPrice)
+	r.POST("/api/bid", bid)
+	r.GET("/api/bid_records", getBidRecords)
+	r.GET("/api/results", getResults)
+	r.GET("/api/result", getResult)
 
 	r.Run(config.ServerAddr)
 }

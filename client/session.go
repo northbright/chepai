@@ -44,7 +44,7 @@ func (s *Session) Login(ID, password string) error {
 
 	buf, _ := json.Marshal(data)
 
-	refURL, _ := url.Parse("/login")
+	refURL, _ := url.Parse("/api/login")
 	urlStr := s.ServerURL.ResolveReference(refURL).String()
 
 	req, err := http.NewRequest("POST", urlStr, bytes.NewReader(buf))
@@ -84,7 +84,7 @@ func (s *Session) Login(ID, password string) error {
 func (s *Session) GetTimeInfo() (*chepai.TimeInfo, error) {
 	var reply chepai.TimeInfoReply
 
-	refURL, _ := url.Parse("/time_info")
+	refURL, _ := url.Parse("/api/time_info")
 	urlStr := s.ServerURL.ResolveReference(refURL).String()
 
 	req, err := http.NewRequest("GET", urlStr, nil)
@@ -120,7 +120,7 @@ func (s *Session) GetTimeInfo() (*chepai.TimeInfo, error) {
 func (s *Session) GetStartPrice() (int64, error) {
 	var reply chepai.StartPriceReply
 
-	refURL, _ := url.Parse("/start_price")
+	refURL, _ := url.Parse("/api/start_price")
 	urlStr := s.ServerURL.ResolveReference(refURL).String()
 
 	req, err := http.NewRequest("GET", urlStr, nil)
@@ -152,7 +152,7 @@ func (s *Session) GetStartPrice() (int64, error) {
 func (s *Session) GetLowestPrice() (int64, error) {
 	var reply chepai.LowestPriceReply
 
-	refURL, _ := url.Parse("/lowest_price")
+	refURL, _ := url.Parse("/api/lowest_price")
 	urlStr := s.ServerURL.ResolveReference(refURL).String()
 
 	req, err := http.NewRequest("GET", urlStr, nil)
@@ -190,7 +190,7 @@ func (s *Session) Bid(price int64) error {
 
 	buf, _ := json.Marshal(data)
 
-	refURL, _ := url.Parse("/bid")
+	refURL, _ := url.Parse("/api/bid")
 	urlStr := s.ServerURL.ResolveReference(refURL).String()
 
 	req, err := http.NewRequest("POST", urlStr, bytes.NewReader(buf))
