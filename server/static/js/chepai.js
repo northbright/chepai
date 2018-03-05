@@ -111,6 +111,59 @@ function getLowestPrice() {
     });
 }
 
+function getBidRecords() {
+    // Get bid records
+    $.ajax({
+        type: "GET",
+        url: "/api/bid_records",
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            console.log("/api/bid_records" + " failed");
+            alert("获取出价记录失败");
+        },
+        success: function (data) {
+            if (data.success) {
+                // Clear records before update
+                $('#bid_records').empty();
+        
+                $.each(data.bid_records, function(index, record) {
+                     $('#bid_records').append('<div class="ui-body ui-body-a"><p>' + record + '</p></div>');
+                });
+            } else {
+                alert("获取出价记录失败: " + data.err);
+            }
+        },
+        dataType: "json"
+    });
+}
+
+function getResult() {
+    // Get result
+    $.ajax({
+        type: "GET",
+        url: "/api/result",
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            console.log("/api/result" + " failed");
+            alert("获取成交结果失败");
+        },
+        success: function (data) {
+            var msg;
+
+            if (data.success) {
+                if (data.done) {
+                    msg = "恭喜你成交, 价格: " + data.price;
+                } else {
+                    msg = "你没有成交";
+                }
+
+                $('#result').text(msg);
+            } else {
+                alert("获取成交结构失败: " + data.err);
+            }
+        },
+        dataType: "json"
+    });
+}
+
 function login(id, password) {
     postData = {id: id, password: password};
     console.log(postData);
@@ -148,11 +201,17 @@ function bid(price) {
             alert("出价失败");
         },
         success: function (data) {
+	    var record;
+
             if (data.success) {
-                alert("出价成功\n" + "phase: " + data.phase + "\nprice: " + price);
+		    record = "第" + data.phase + "阶段出价成功: " + price;
             } else {
-                alert("出价失败: " + data.err);
+		    record = "第" + data.phase + "阶段出价失败: " + data.err;
             }
+
+	    console.log(record);
+	    $('#bid_records').append('<div class="ui-body ui-body-a"><p>' + record + '</p></div>');
+	    
         },
         dataType: "json"
     });
@@ -175,6 +234,10 @@ $(document).ready(function () {
 
         bid(price);
     });	
+
+    $('#resultBtn').click(function () {
+        getResult();
+    });
 });
 
 $(document).on("pageinit","#page1",function(){
