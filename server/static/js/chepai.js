@@ -15,7 +15,7 @@ function getPublicInfo() {
     // Get time info
     $.ajax({
         type: "GET",
-        url: "/api/time_info",
+        url: "/api/unix_time_info",
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             console.log("/api/time_info" + " failed");
 	    alert("获取时间信息失败");
@@ -175,8 +175,6 @@ $(document).ready(function () {
 
         bid(price);
     });	
-
-    console.log("unix nano time to str: " + unixTimeToStr(1520239957778280725));
 });
 
 $(document).on("pageinit","#page1",function(){
