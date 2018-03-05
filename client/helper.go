@@ -7,12 +7,12 @@ import (
 	"github.com/northbright/random"
 )
 
-func genSleepTime(beginTime, endTime time.Time) (time.Duration, error) {
-	pad := time.Millisecond * 100
-	wakeupTime, err := random.RandTime(beginTime, endTime, pad)
+func genSleepTime(ID string, beginTime, endTime time.Time) (time.Duration, error) {
+	wakeupTime, err := random.Time(beginTime, endTime)
 	if err != nil {
 		return 0, err
 	}
+
 	return wakeupTime.Sub(time.Now()), nil
 }
 

@@ -81,10 +81,10 @@ func (s *Session) Login(ID, password string) error {
 	return nil
 }
 
-func (s *Session) GetTimeInfo() (*chepai.TimeInfo, error) {
-	var reply chepai.TimeInfoReply
+func (s *Session) GetUnixNanoTimeInfo() (*chepai.TimeInfo, error) {
+	var reply chepai.UnixNanoTimeInfoReply
 
-	refURL, _ := url.Parse("/api/time_info")
+	refURL, _ := url.Parse("/api/unix_nano_time_info")
 	urlStr := s.ServerURL.ResolveReference(refURL).String()
 
 	req, err := http.NewRequest("GET", urlStr, nil)
@@ -111,9 +111,9 @@ func (s *Session) GetTimeInfo() (*chepai.TimeInfo, error) {
 		return nil, fmt.Errorf(reply.ErrMsg)
 	}
 	return &chepai.TimeInfo{
-		time.Unix(reply.BeginTime, 0),
-		time.Unix(reply.PhaseOneEndTime, 0),
-		time.Unix(reply.PhaseTwoEndTime, 0),
+		time.Unix(0, reply.BeginTime),
+		time.Unix(0, reply.PhaseOneEndTime),
+		time.Unix(0, reply.PhaseTwoEndTime),
 	}, nil
 }
 

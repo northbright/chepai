@@ -113,9 +113,9 @@ func EmuBid(config Config, sem chan struct{}, i int64) {
 	}
 
 	// Get time info
-	info, err := s.GetTimeInfo()
+	info, err := s.GetUnixNanoTimeInfo()
 	if err != nil {
-		log.Printf("GetTimeInfo() error: %v", err)
+		log.Printf("GetUnixNanoTimeInfo() error: %v", err)
 		return
 	}
 
@@ -127,26 +127,28 @@ func EmuBid(config Config, sem chan struct{}, i int64) {
 	}
 
 	// Generate sleep duration before phase one end
-	duration, err := genSleepTime(time.Now(), info.BeginTime, info.PhaseOneEndTime)
+	duration, err := genSleepTime(ID, info.BeginTime, info.PhaseOneEndTime)
 	if err != nil {
 		log.Printf("gen phase one sleep time error: %v", err)
 		return
 	}
 	time.Sleep(duration)
 
+	log.Printf("ID: %v, phase 1 wake: %v", ID, time.Now())
 	if err = s.Bid(startPrice); err != nil {
-		log.Printf("bid on phase one error: %v", err)
+		log.Printf("ID: %v, bid on phase one error: %v", ID, err)
 		return
 	}
 
 	// Generate sleep duration before phase two end
-	duration, err = genSleepTime(time.Now(), info.PhaseOneEndTime, info.PhaseTwoEndTime)
+	duration, err = genSleepTime(ID, info.PhaseOneEndTime, info.PhaseTwoEndTime)
 	if err != nil {
 		log.Printf("gen phase two sleep time error: %v", err)
 		return
 	}
 	time.Sleep(duration)
 
+	log.Printf("ID: %v, phase 2 wake: %v", ID, time.Now())
 	lowestPrice, err := s.GetLowestPrice()
 	if err != nil {
 		log.Printf("get lowest price on phase two error: %v", err)
@@ -156,7 +158,7 @@ func EmuBid(config Config, sem chan struct{}, i int64) {
 	// Generate bid price for phase two
 	price := generatePhaseTwoPrice(lowestPrice)
 	if err = s.Bid(price); err != nil {
-		log.Printf("bid on phase two error: %v", err)
+		log.Printf("ID: %v, bid on phase two error: %v", ID, err)
 		return
 	}
 
