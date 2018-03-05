@@ -6,7 +6,14 @@ type Reply struct {
 	ID      string `json:"id"`
 }
 
-type TimeInfoReply struct {
+type UnixNanoTimeInfoReply struct {
+	Reply
+	BeginTime       int64 `json:"begin_time"`
+	PhaseOneEndTime int64 `json:"phase_one_end_time"`
+	PhaseTwoEndTime int64 `json:"phase_two_end_time"`
+}
+
+type UnixTimeInfoReply struct {
 	Reply
 	BeginTime       int64 `json:"begin_time"`
 	PhaseOneEndTime int64 `json:"phase_one_end_time"`

@@ -81,7 +81,8 @@ func main() {
 
 	// Core APIs.
 	r.POST("/api/login", loginPOST)
-	r.GET("/api/time_info", getTimeInfo)
+	r.GET("/api/unix_nano_time_info", getUnixNanoTimeInfo)
+	r.GET("/api/unix_time_info", getUnixTimeInfo)
 	r.GET("/api/start_price", getStartPrice)
 	r.GET("/api/license_plate_num", getLicensePlateNum)
 	r.GET("/api/lowest_price", getLowestPrice)

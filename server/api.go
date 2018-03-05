@@ -36,17 +36,48 @@ func getLoginID(c *gin.Context) (string, error) {
 
 }
 
-func getTimeInfo(c *gin.Context) {
+func getUnixNanoTimeInfo(c *gin.Context) {
 	var (
 		err      error
 		timeInfo chepai.TimeInfo
-		reply    = chepai.TimeInfoReply{}
+		reply    = chepai.UnixNanoTimeInfoReply{}
 	)
 
 	defer func() {
 		if err != nil {
 			reply.ErrMsg = err.Error()
-			log.Printf("getTimeInfo() error: %v", err)
+			log.Printf("getUnixNanoTimeInfo() error: %v", err)
+		}
+
+		c.JSON(200, reply)
+	}()
+
+	if reply.ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error")
+		return
+	}
+
+	timeInfo = cp.GetTimeInfo()
+	reply.BeginTime = timeInfo.BeginTime.UnixNano()
+	reply.PhaseOneEndTime = timeInfo.PhaseOneEndTime.UnixNano()
+	reply.PhaseTwoEndTime = timeInfo.PhaseTwoEndTime.UnixNano()
+
+	reply.Success = true
+
+	//log.Printf("getUnixNanoTimeInfo() OK, reply: %v", reply)
+}
+
+func getUnixTimeInfo(c *gin.Context) {
+	var (
+		err      error
+		timeInfo chepai.TimeInfo
+		reply    = chepai.UnixTimeInfoReply{}
+	)
+
+	defer func() {
+		if err != nil {
+			reply.ErrMsg = err.Error()
+			log.Printf("getUnixTimeInfo() error: %v", err)
 		}
 
 		c.JSON(200, reply)
@@ -64,7 +95,7 @@ func getTimeInfo(c *gin.Context) {
 
 	reply.Success = true
 
-	//log.Printf("getTimeInfo() OK, reply: %v", reply)
+	//log.Printf("getUnixTimeInfo() OK, reply: %v", reply)
 }
 
 func validLogin(ID, password string) bool {
