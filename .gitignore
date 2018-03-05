@@ -16,3 +16,5 @@ config.json
 !*.jpg
 !*.png
 !*.gif
+# For template
+!*.tmpl
