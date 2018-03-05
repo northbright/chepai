@@ -101,9 +101,6 @@ func (cp *Chepai) ComputePhaseTwoLowestPrice() (int64, error) {
 }
 
 func (cp *Chepai) ComupteLowestPrice(phase int) (int64, error) {
-	conn := cp.pool.Get()
-	defer conn.Close()
-
 	switch phase {
 	case 0, 1:
 		return cp.StartPrice, nil
