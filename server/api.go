@@ -202,6 +202,35 @@ func getLowestPrice(c *gin.Context) {
 	//log.Printf("getLowestPrice() OK, reply: %v", reply)
 }
 
+func getBidderNum(c *gin.Context) {
+	var (
+		err   error
+		reply chepai.BidderNumReply
+	)
+
+	defer func() {
+		if err != nil {
+			reply.ErrMsg = err.Error()
+			log.Printf("getBidderNum() error: %v", err)
+		}
+
+		c.JSON(200, reply)
+	}()
+
+	if reply.ID, err = getLoginID(c); err != nil {
+		log.Printf("getLoginID() error")
+		return
+	}
+
+	if reply.BidderNum, err = cp.GetBidderNum(); err != nil {
+		log.Printf("GetBidderNum() error: %v")
+		return
+	}
+
+	reply.Success = true
+	//log.Printf("getLowestPrice() OK, reply: %v", reply)
+}
+
 func bid(c *gin.Context) {
 	type Req struct {
 		Price int64 `json:"price"`

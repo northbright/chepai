@@ -28,10 +28,11 @@ type Config struct {
 }
 
 var (
-	currentDir, configFile string
-	config                 Config
-	pool                   *redis.Pool
-	cp                     *chepai.Chepai
+	currentDir, configFile    string
+	templatesPath, staticPath string
+	config                    Config
+	pool                      *redis.Pool
+	cp                        *chepai.Chepai
 )
 
 func main() {
@@ -72,16 +73,26 @@ func main() {
 
 	r := gin.Default()
 
+	// Serve Static files.
+	r.Static("/static/", staticPath)
+
+	// Load Templates.
+	r.LoadHTMLGlob(fmt.Sprintf("%v/*", templatesPath))
+
 	// Core APIs.
 	r.POST("/api/login", loginPOST)
 	r.GET("/api/time_info", getTimeInfo)
 	r.GET("/api/start_price", getStartPrice)
 	r.GET("/api/license_plate_num", getLicensePlateNum)
 	r.GET("/api/lowest_price", getLowestPrice)
+	r.GET("/api/bidder_num", getBidderNum)
 	r.POST("/api/bid", bid)
 	r.GET("/api/bid_records", getBidRecords)
 	r.GET("/api/results", getResults)
 	r.GET("/api/result", getResult)
+
+	// Pages.
+	r.GET("/", home)
 
 	r.Run(config.ServerAddr)
 }
@@ -90,6 +101,8 @@ func main() {
 func init() {
 	currentDir, _ = pathhelper.GetCurrentExecDir()
 	configFile = path.Join(currentDir, "config.json")
+	templatesPath = path.Join(currentDir, "templates")
+	staticPath = path.Join(currentDir, "static")
 }
 
 // loadConfig loads app config.

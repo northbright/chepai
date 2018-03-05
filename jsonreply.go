@@ -28,6 +28,11 @@ type LowestPriceReply struct {
 	LowestPrice int64 `json:"lowest_price"`
 }
 
+type BidderNumReply struct {
+	Reply
+	BidderNum int64 `json:"bidder_num"`
+}
+
 type BidReply struct {
 	Reply
 	Phase int   `json:"phase"`
