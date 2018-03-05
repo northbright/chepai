@@ -127,7 +127,7 @@ func EmuBid(config Config, sem chan struct{}, i int64) {
 	}
 
 	// Generate sleep duration before phase one end
-	duration, err := genSleepTime(ID, info.BeginTime, info.PhaseOneEndTime)
+	duration, err := genSleepTime(ID, info.BeginTime, info.PhaseOneEndTime.Add((-2)*time.Second))
 	if err != nil {
 		log.Printf("gen phase one sleep time error: %v", err)
 		return
@@ -141,7 +141,7 @@ func EmuBid(config Config, sem chan struct{}, i int64) {
 	}
 
 	// Generate sleep duration before phase two end
-	duration, err = genSleepTime(ID, info.PhaseOneEndTime, info.PhaseTwoEndTime)
+	duration, err = genSleepTime(ID, info.PhaseOneEndTime, info.PhaseTwoEndTime.Add((-2)*time.Second))
 	if err != nil {
 		log.Printf("gen phase two sleep time error: %v", err)
 		return
