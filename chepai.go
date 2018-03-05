@@ -411,6 +411,18 @@ func (cp *Chepai) GetResultByID(ID string) (bool, int64, error) {
 	conn := cp.pool.Get()
 	defer conn.Close()
 
+	// If results have not been generated, generate them.
+	exists, err := redis.Bool(conn.Do("EXISTS", "results"))
+	if err != nil {
+		return false, 0, err
+	}
+
+	if !exists {
+		if err = cp.GenerateResults(); err != nil {
+			return false, 0, err
+		}
+	}
+
 	price, err := redis.Int64(conn.Do("HGET", "results", ID))
 	switch err {
 	case redis.ErrNil:
