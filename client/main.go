@@ -134,7 +134,7 @@ func EmuBid(config Config, sem chan struct{}, i int64) {
 	}
 	time.Sleep(duration)
 
-	log.Printf("ID: %v, phase 1 wake: %v", ID, time.Now())
+	//log.Printf("ID: %v, phase 1 wake: %v", ID, time.Now())
 	if err = s.Bid(startPrice); err != nil {
 		log.Printf("ID: %v, bid on phase one error: %v", ID, err)
 		return
@@ -148,7 +148,7 @@ func EmuBid(config Config, sem chan struct{}, i int64) {
 	}
 	time.Sleep(duration)
 
-	log.Printf("ID: %v, phase 2 wake: %v", ID, time.Now())
+	//log.Printf("ID: %v, phase 2 wake: %v", ID, time.Now())
 	lowestPrice, err := s.GetLowestPrice()
 	if err != nil {
 		log.Printf("get lowest price on phase two error: %v", err)
