@@ -157,7 +157,7 @@ function getResult() {
 
                 $('#result').text(msg);
             } else {
-                alert("获取成交结构失败: " + data.err);
+                alert("获取成交价格失败: " + data.err);
             }
         },
         dataType: "json"
